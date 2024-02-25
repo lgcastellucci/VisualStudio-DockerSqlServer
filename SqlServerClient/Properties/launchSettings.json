@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SqlServerClient": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

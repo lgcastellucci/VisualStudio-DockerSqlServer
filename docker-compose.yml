@@ -1,0 +1,45 @@
+networks:
+  MyNetwork:
+    driver: bridge
+
+services:
+    
+  sqlserver:
+    container_name: sqlserver
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      SA_PASSWORD: "SqlServer2019!"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      LANG: "pt_BR.UTF-8"
+    ports:
+      - "1433:1433"
+#    volumes:
+#      - ./ScriptsSql/OPERADORA_NOVA_Backup202402152320_TARDE.BAK:/tmp/OPERADORA_NOVA.BAK
+    networks:
+      - MyNetwork
+
+  mssqltools:
+    container_name: mssqltools  
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - sqlserver
+    volumes:
+      - ./ScriptsShell/ConfiguraSqlServer.sh:/tmp/ConfiguraSqlServer.sh
+      - ./ScriptsSql/01-CriarUsuario.sql:/tmp/01-CriarUsuario.sql
+      - ./ScriptsSql/02-CriarNovaBase.sql:/tmp/02-CriarNovaBase.sql
+      - ./ScriptsSql/03-CriandoTabelas.sql:/tmp/03-CriandoTabelas.sql
+    command: /bin/bash ./tmp/ConfiguraSqlServer.sh
+    networks:
+      - MyNetwork
+
+  sqlserverclient:
+    container_name: sqlserverclient
+    image: ${DOCKER_REGISTRY-}sqlserverclient
+    build:
+      dockerfile: SqlServerClient/Dockerfile
+    depends_on:
+      - sqlserver
+    networks:
+      - MyNetwork
+
